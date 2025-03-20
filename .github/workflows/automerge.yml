@@ -1,4 +1,4 @@
-=name: Auto Merge Lower to Higher Release Branches
+name: Auto Merge Lower to Higher Release Branches
 
 on:
   schedule:
