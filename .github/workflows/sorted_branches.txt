@@ -1,6 +1,6 @@
-release/2501.0
-release/2502.0
-release/2503.0
-release/2504.0
-release/2505.0
-release/2506.0
+origin/release/2501.0
+origin/release/2502.0
+origin/release/2503.0
+origin/release/2504.0
+origin/release/2505.0
+origin/release/2506.0
