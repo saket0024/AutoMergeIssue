@@ -23,7 +23,7 @@ jobs:
         id: sort_branches
         run: |
           # List remote branches that match the pattern (e.g., release/250*)
-          branches=$(git branch -r | grep 'release/250' | sed 's/release\///')
+          branches=$(git branch -r | grep 'origin/release/250' | sed 's/origin/release\///')
           echo "Unsorted branches:"
           echo "$branches"
           # Sort branches using version sort (sort -V)
@@ -62,7 +62,7 @@ jobs:
             }
 
             # Push the merge result to remote
-            git push release $higher || {
+            git push origin/release $higher || {
               echo "Push failed for branch $higher"
               exit 1
             }
