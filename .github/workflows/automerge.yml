@@ -23,7 +23,7 @@ jobs:
         id: sort_branches
         run: |
           # List remote branches that match the pattern (e.g., release/250*)
-          branches=$(git branch -r | grep 'origin/release/250' | sed 's/origin/release\///')
+          branches=$(git branch -r | grep 'origin/release/250' | sed 's/origin\///')
           echo "Unsorted branches:"
           echo "$branches"
           # Sort branches using version sort (sort -V)
