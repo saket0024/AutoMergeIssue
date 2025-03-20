@@ -1,0 +1,72 @@
+name: Auto Merge Lower to Higher Release Branches
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # Runs daily at 03:00 UTC (adjust as needed)
+  workflow_dispatch:
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch full history for merges
+
+      - name: Set up Git configuration
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+
+      - name: List and sort release branches
+        id: sort_branches
+        run: |
+          # List remote branches that match the pattern (e.g., origin/250*)
+          branches=$(git branch -r | grep 'origin/250' | sed 's/origin\///')
+          echo "Unsorted branches:"
+          echo "$branches"
+          # Sort branches using version sort (sort -V)
+          sorted=$(echo "$branches" | sort -V)
+          echo "Sorted branches:"
+          echo "$sorted"
+          # Save the sorted branch names to a file for further processing
+          echo "$sorted" > sorted_branches.txt
+          # Print sorted branches to GitHub Actions log
+          echo "::set-output name=branches::$sorted"
+
+      - name: Merge lower branch changes to higher branches
+        env:
+          REPO: ${{ github.repository }}
+        run: |
+          # Read the sorted branches into an array
+          mapfile -t branches < sorted_branches.txt
+          echo "Processing branches:"
+          printf "%s\n" "${branches[@]}"
+
+          # Loop through pairs of branches (lower to higher)
+          for (( i=0; i<${#branches[@]}-1; i++ )); do
+            lower=${branches[i]}
+            higher=${branches[i+1]}
+            echo "Merging from $lower into $higher"
+
+            # Checkout the target (higher) branch
+            git checkout $higher
+
+            # Merge changes from the lower branch into the higher branch using "ours" strategy if needed
+            # (This ensures that in case of conflicts, we favor the higher branch's content,
+            #  but you may change the strategy as per your requirements.)
+            git merge --no-ff --no-edit $lower || {
+              echo "Merge conflict encountered when merging $lower into $higher, skipping..."
+              continue
+            }
+
+            # Push the merge result to remote
+            git push origin $higher || {
+              echo "Push failed for branch $higher"
+              exit 1
+            }
+          done
+
+      - name: Finish and clean up
+        run: echo "Auto merge process completed."
